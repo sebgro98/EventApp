@@ -1,0 +1,4 @@
+email.from=sushilkc@kth.se
+email.host=smtp.kth.se
+email.username=sushilkc
+email.password=Kcchronos2002

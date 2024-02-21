@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+    <h:head>
+        <title>Home Page</title>
+        <style>
+            .card {
+                background-color: #fff;
+                border-radius: 8px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                padding: 20px;
+                margin: 20px;
+                max-width: 400px;
+                text-align: left;
+            }
+
+            h:repeat {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            div {
+                margin-bottom: 20px;
+            }
+
+            h1 {
+                text-align: center;
+            }
+        </style>
+
+        <script>
+            const socket = new WebSocket("ws://localhost:8080/eventApp/event-updates");
+
+            socket.onopen = function (event) {
+                console.log("WebSocket connection opened");
+            };
+
+            socket.onmessage = function (event) {
+                console.log("Received message: " + event.data);
+
+                // Update your UI based on the received message
+                const eventData = event.data.split(":");
+                const messageType = eventData[0];
+                const eventId = eventData[1];
+
+                console.log("Message Type: " + messageType);
+                console.log("Event ID: " + eventId);
+
+                if (messageType === "EventCancelled") {
+                    const eventElement = document.getElementById("event-" + eventId);
+                    if (eventElement) {
+                        eventElement.parentNode.removeChild(eventElement);
+                        console.log("Event removed from UI");
+                    }
+                } else if (messageType === "EventBooked") {
+                    const bookButton = document.getElementById("bookmyPlace-" + eventId);
+                    if (bookButton) {
+                        bookButton.value = "Unbook Event";
+                        console.log("Book button updated");
+                    }
+                } else if (messageType === "EventUnbooked") {
+                    const unbookButton = document.getElementById("unbookEvent-" + eventId);
+                    if (unbookButton) {
+                        unbookButton.value = "Book My place at event";
+                        console.log("Unbook button updated");
+                    }
+                } else if (messageType === "EventCreated") {
+                    // Handle created events as needed
+                    // You may need to fetch updated event details from the server
+                    // and update the UI accordingly
+                    console.log("New event created");
+                }
+                
+
+
+            };
+
+
+            socket.onclose = function (event) {
+                console.log("WebSocket connection closed");
+            };
+        </script>
+
+    </h:head>
+
+    <h:body>
+        <h1>Welcome #{loginObj.userName}</h1>
+
+        <!-- Link to My Bookings page -->
+        <h:form>
+            <h:commandButton value="View My Bookings" action="#{homePageObj.viewMyBookings}" />
+        </h:form>
+
+        <!-- Section for My Events -->
+        <h:panelGroup rendered="#{not empty homePageObj.myEvents}">
+            <h2>My events</h2>
+            <ui:repeat value="#{homePageObj.myEvents}" var="event">
+                <div class="card" id="event-#{event.eventId}">
+                    <h2>Event ID: #{event.eventId}</h2>
+                    <h2>Event Name: #{event.eventName}</h2>
+                    <p>Event Date: #{event.eventDate}</p>
+                    <p>Event Description: #{event.eventDescription}</p>
+                    <p>Number of Places: #{event.eventNumOfPlaces}</p>
+                    <p>Number of Places Left: #{event.eventNumOfPlacesLeft}</p>
+
+                    <h:form rendered="#{homePageObj.isUserAdminForEvent(event)}">
+                        <h:commandButton id="cancelEvent" value="Cancel Event" action="#{homePageObj.cancelEvent(event)}">
+                            <f:ajax render="event-#{event.eventId}" />
+                        </h:commandButton>
+                        <br/>
+                        <h:commandButton id="seeEventPartici" value="View Event Participents" action="#{homePageObj.viewEventPrati(event)}">
+                        </h:commandButton>
+                    </h:form>
+
+
+
+                </div>
+            </ui:repeat>
+        </h:panelGroup>
+
+        <!-- Section for Other Events -->
+        <h:panelGroup rendered="#{not empty homePageObj.otherEvents}">
+            <h2>Other events</h2>
+            <ui:repeat value="#{homePageObj.otherEvents}" var="event">
+                <div class="card" id="event-#{event.eventId}">
+                    <h2>Event ID: #{event.eventId}</h2>
+                    <h2>Event Name: #{event.eventName}</h2>
+                    <p>Event Date: #{event.eventDate}</p>
+                    <p>Event Description: #{event.eventDescription}</p>
+                    <p>Number of Places: #{event.eventNumOfPlaces}</p>
+                    <p>Number of Places Left: #{event.eventNumOfPlacesLeft}</p>
+
+                    <h:form rendered="#{homePageObj.renderBookButton(event)}">
+                        <h:commandButton id="bookmyPlace-#{event.eventId}" value="Book My place at event" action="#{homePageObj.bookEvent(event)}">
+                            <f:ajax render="event-#{event.eventId}" />
+                        </h:commandButton>
+                    </h:form>
+
+                    <h:form rendered="#{homePageObj.isUserAdminForEvent(event)}">
+                        <h:outputText value="You created this event." />
+                    </h:form>
+
+                    <h:form rendered="#{not homePageObj.renderBookButton(event) and not homePageObj.isUserAdminForEvent(event)}">
+                        <h:outputText value="Event is full or you have already booked the event" />
+                    </h:form>
+                    <h:form rendered="#{homePageObj.hasUserBooked(event)}">
+                        <h:commandButton id="unbookEvent-#{event.eventId}" value="Unbook Event" action="#{homePageObj.unbookEvent(event)}">
+                            <f:ajax render="event-#{event.eventId}" />
+                        </h:commandButton>
+                    </h:form>
+                </div>
+            </ui:repeat>
+        </h:panelGroup>
+
+        <!-- Add your additional sections or content here -->
+
+    </h:body>
+
+    <h:form rendered="#{homePageObj.isAdmin}">
+        <h:commandButton id="createNewEvent" value="create New Event" action="#{homePageObj.makeNewEvent()}" />
+    </h:form>
+</html>

@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+<h:head>
+    <title>Login Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .login-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+
+        h:form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h:outputLabel {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        h:inputText,
+        h:inputSecret {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        h:commandButton {
+            background-color: #4caf50;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        h:commandButton:hover {
+            background-color: #45a049;
+        }
+    </style>
+</h:head>
+    <h:body>
+        <div class="login-container">
+            <h:form>
+                <h:outputLabel for="username">
+                    <h:outputText value="Username"></h:outputText>
+                </h:outputLabel>
+                <h:inputText id="username" value="#{loginObj.userName}" required="true"></h:inputText>
+                <br/>
+
+                <h:outputLabel for="password">
+                    <h:outputText value="Password"></h:outputText>
+                </h:outputLabel>
+                <h:inputSecret id="password" value="#{loginObj.password}" required="true"></h:inputSecret>
+                <br/>
+                
+                <h:outputLabel for="user/adminCode">
+                    <h:outputText value="user/adminCode"></h:outputText>
+                </h:outputLabel>
+                <h:inputSecret id="adminUserCode" value="#{loginObj.adminUserCode}" required="false"></h:inputSecret>
+                <br/>
+
+                <h:commandButton id="cmdLogin" value="Login" action="#{loginObj.checkCread}" />
+                
+                 <h:commandButton id="cmdRegister" value="Register" action="#{loginObj.registerAcc}" />
+            </h:form>
+        </div>
+    </h:body>
+</html>
